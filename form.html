@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sprout Customer Form</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    :root {
+      --blue: #00b3e6;
+      --orange: #f26522;
+      --dark: #333;
+      --light-bg: #f9fafa;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--light-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      color: var(--dark);
+    }
+
+    .logo {
+      max-width: 160px;
+      margin-bottom: 20px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      max-width: 420px;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    .card-box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      font-weight: 600;
+      font-size: 17px;
+      color: var(--orange);
+      transition: transform 0.3s ease;
+    }
+
+    .card-box:hover {
+      transform: scale(1.05);
+      background-color: #fef6f2;
+    }
+
+    .container {
+      max-width: 480px;
+      width: 100%;
+      background: white;
+      padding: 30px 25px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--orange);
+      font-size: 22px;
+      margin: 0;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 15px;
+      color: var(--dark);
+      margin: 10px 0 25px;
+    }
+
+    form input,
+    form select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    form select {
+      background: #fff;
+    }
+
+    form button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    form button:hover {
+      background: var(--orange);
+    }
+
+    @media (max-width: 600px) {
+      .card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ Sprout Logo -->
+  <img src="./sprout.png" alt="Sprout Logo" class="logo" />
+
+  <!-- ✅ 4 Cards: Courses, Projects, Internships, Certifications -->
+  <div class="card-grid">
+    <div class="card-box">Courses</div>
+    <div class="card-box">Projects</div>
+    <div class="card-box">Internships</div>
+    <div class="card-box">Certifications</div>
+  </div>
+
+  <!-- ✅ Form Section -->
+  <div class="container">
+    <h2>For a Brighter Future</h2>
+    <p class="subtitle">Enter your details for Amazing Offers</p>
+
+    <form id="customerForm">
+      <input type="text" id="name" placeholder="Your Name" required />
+      <input type="tel" id="phone" placeholder="Phone Number" required />
+      <input type="email" id="email" placeholder="Email ID" required />
+      <select id="group" required>
+        <option value="">Select Group</option>
+        <option value="school">School</option>
+        <option value="college">College</option>
+        <option value="homemaker">Homemaker</option>
+        <option value="others">Others</option>
+      </select>
+      <button type="submit"><i class="fas fa-paper-plane"></i> Submit</button>
+    </form>
+  </div>
+
+  <!-- ✅ Firebase Submit Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDJoDDjXHnVMqIoue5XkAcmbfcQ0cmTFb0",
+    authDomain: "qrcode-8a262.firebaseapp.com",
+    projectId: "qrcode-8a262",
+    storageBucket: "qrcode-8a262.firebasestorage.app",
+    messagingSenderId: "290257911687",
+    appId: "1:290257911687:web:0faf4f81f98dbcb5871d22",
+    measurementId: "G-L0C6F5MTY2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerId = urlParams.get("id");
+
+    const form = document.getElementById("customerForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        group: document.getElementById("group").value,
+        customerId: customerId || "UNKNOWN",
+        submittedAt: new Date().toISOString()
+      };
+
+      try {
+        await addDoc(collection(db, "customerResponses"), data);
+        alert("Form submitted successfully!");
+        form.reset();
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
